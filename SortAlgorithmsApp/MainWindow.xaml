@@ -1,0 +1,38 @@
+﻿<Window x:Class="SortAlgorithmsApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SortAlgorithmsApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Background="#FF292929" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="1" Orientation="Vertical">
+            <Button Content="Generate" Click="Generate_Click"/>
+            <Button Content="Shuffle" Click="Shuffle_Click"/>
+            <Button Content="Bubble sort" Click="Bubble_Click"/>
+            <Button Content="Shaker sort" Click="Shaker_Click"/>
+            <Button Content="Shell2 sort" Click="Shell2_Click"/>
+            <Button Content="Shell sort" Click="Shell_Click"/>
+            <Button Content="Selection sort" Click="Selection_Click"/>
+        </StackPanel>
+
+        <Border Grid.Column="0" BorderBrush="#FFB0B1BB" Margin="15" BorderThickness="1">
+            <StackPanel x:Name="container" Orientation="Horizontal">
+                <ItemsControl x:Name="con" ItemsSource="{Binding array}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+        
+    </Grid>
+</Window>

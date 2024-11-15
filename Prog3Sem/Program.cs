@@ -404,7 +404,7 @@ namespace Prog3Sem
             for (int i = 0; i < store.Lenght; i++)
             {
                 store[i] = new Floppy($"Floppy {i + 1}", (FormatInchEnum)r.Next(0, 3), (ushort)r.Next(0, 28800));
-                //store[i] = new Floppy($"Floppy {i + 1}", (FormatInchEnum)r.Next(0, 3), Convert.ToUInt16(i));
+                
             }
             Console.WriteLine($"Размер хранилище: {sizeStore} объектов, {cycle} циклов сортировки.\n\r");
             store.Shuffle();
