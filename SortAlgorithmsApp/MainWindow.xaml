@@ -5,24 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SortAlgorithmsApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="640" Width="800">
     <Grid Background="#FF292929" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="18*"/>
+        </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="1" Orientation="Vertical">
-            <Button Content="Generate" Click="Generate_Click"/>
-            <Button Content="Shuffle" Click="Shuffle_Click"/>
-            <Button Content="Bubble sort" Click="Bubble_Click"/>
-            <Button Content="Shaker sort" Click="Shaker_Click"/>
-            <Button Content="Shell2 sort" Click="Shell2_Click"/>
-            <Button Content="Shell sort" Click="Shell_Click"/>
-            <Button Content="Selection sort" Click="Selection_Click"/>
-        </StackPanel>
-
-        <Border Grid.Column="0" BorderBrush="#FFB0B1BB" Margin="15" BorderThickness="1">
+        <TextBlock x:Name="comps" Grid.Column="0" Grid.Row="0" Foreground="White" Text="Comparisions - 0 | Array acceses - 0 | Time - 0 ms" Padding="15, 10"/>
+        <Border x:Name="border" Grid.Column="0" Grid.Row="2" CornerRadius="3" BorderBrush="Azure" Margin="15,7,7,15" BorderThickness="1">
             <StackPanel x:Name="container" Orientation="Horizontal">
                 <ItemsControl x:Name="con" ItemsSource="{Binding array}">
                     <ItemsControl.ItemsPanel>
@@ -33,6 +29,32 @@
                 </ItemsControl>
             </StackPanel>
         </Border>
+
+        <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="3" Background="DimGray" ResizeBehavior="PreviousAndNext" VerticalAlignment="Stretch"/>
         
+        <StackPanel Grid.Column="2" Grid.RowSpan="2" Margin="7,15,15,15">
+            <Label Content="Number of elements" Foreground="White" Padding="0"/>
+            <TextBox x:Name="textBoxCount" Margin="0,0,0,2" PreviewTextInput="NumberValidationTextBox" InputScope="Number"/>
+            <Label Content="Delay" Foreground="White" Padding="0"/>
+            <TextBox x:Name="textBoxDelay" Margin="0,0,0,5" PreviewTextInput="NumberValidationTextBox" InputScope="Number"/>
+            <Button Content="Generate" Click="Generate_Click" Margin="0,2,0,5"/>
+
+            <ComboBox x:Name="comboBoxAlgorithm" Margin="0,5,0,2" Loaded="comboBoxAlgorithm_Loaded" />
+
+            <Grid Margin="0,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Content="Shuffle" Click="Shuffle_Click" Margin="0,0,5,0" VerticalContentAlignment="Center"/>
+
+                <Button Grid.Column="1" Content="Sort" Click="Sort_Click" Margin="5,0,0,0"/>
+            </Grid>
+
+            <Expander Header="History" Foreground="White">
+                <RichTextBox x:Name="rtb" HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Loaded="rtb_Loaded"/>
+            </Expander>
+        </StackPanel>
     </Grid>
 </Window>

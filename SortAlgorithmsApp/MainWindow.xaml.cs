@@ -1,38 +1,61 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Security.AccessControl;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace SortAlgorithmsApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<Rectangle> array { get; set; }
+        public ObservableCollection<Rectangle> array { get; set; } = new ObservableCollection<Rectangle>();
+
+        Dictionary<string, Func<Task>> functionSortDict;
+        public int arrayAcceses = 0;
+        public int comparisions = 0;
+        public Stopwatch time = new Stopwatch();
+        public int delay = 1;
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
+            functionSortDict = new Dictionary<string, Func<Task>>()
+            {
+                { "Insertion", InsertionSort },
+                { "Selection", SelectionSort },
+                { "Bubble", BubbleSort },
+                { "Shaker", ShakerSort },
+                { "Shell", ShellSort },
+                { "Quick", QuickSort },
+            };
         }
 
-        private ObservableCollection<Rectangle> GenerateArray(int count)
+        private void Array_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            var result = new ObservableCollection<Rectangle>();
-            var w = container.ActualWidth / count;
-            var h = container.ActualHeight / count;
+            arrayAcceses++;
+            comps.Text = $"{comboBoxAlgorithm.SelectedItem} sort | Comparisions - {comparisions} | Array acceses - {arrayAcceses} | Time - {time.ElapsedMilliseconds} ms";
+        }
+
+        private bool Compare(double obj1, double obj2)
+        {
+            comparisions++;
+            return obj1 > obj2;
+        }
+
+        private Rectangle GetValue(int index)
+        {
+            arrayAcceses++;
+            return array[index];
+        }
+
+        private void GenerateArray(int count)
+        {
+            array.Clear();
+            var w = border.ActualWidth / count;
+            var h = (border.ActualHeight - 3) / count;
             for (int i = 1; i <= count; i++)
             {
                 var rect = new Rectangle()
@@ -40,14 +63,12 @@ namespace SortAlgorithmsApp
                     Width = w,
                     Height = h * i,
                     Fill = Brushes.White,
-
-
+                    SnapsToDevicePixels = true,
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
                 };
-                result.Add(rect);
+                array.Add(rect);
             }
-            return result;
         }
 
         private async Task Shuffle(ObservableCollection<Rectangle> collection)
@@ -68,197 +89,215 @@ namespace SortAlgorithmsApp
             }
         }
 
-        private async Task InsertionSort(ObservableCollection<Rectangle> collection)
+        private async Task InsertionSort()
         {
-            if (collection.Count == 0 || collection.Count == 1) return;
+            if (array.Count == 0 || array.Count == 1) return;
 
-            for (int i = 1; i < collection.Count; i++)
+            for (int i = 1; i < array.Count; i++)
             {
-                var value = collection[i];
+                var temp = GetValue(i);
                 var index = i;
-                while (index > 0 && collection[index - 1].Height > value.Height)
+                while (index > 0 && Compare(GetValue(index - 1).Height, temp.Height))
                 {
-                    //collection[index] = collection[index - 1];
-                    collection.Move(index, index - 1);
-
-                    await Task.Delay(1);
+                    array[index - 1].Fill = Brushes.Red;
+                    array.Move(index - 1, index);
+                    await Task.Delay(delay);
+                    array[index].Fill = Brushes.White;
                     index--;
                 }
-                //collection[index] = value;
-                collection.Move(index, i);
-
+                array.Remove(temp);
+                array.Insert(index, temp);
             }
         }
 
-        private async Task BubbleSort(ObservableCollection<Rectangle> collection)
+        private async Task BubbleSort()
         {
-            for (int k = 0; k < collection.Count - 1; k++)
+            for (int k = 0; k < array.Count - 1; k++)
             {
-                for (int i = 0; i < collection.Count - 1; i++)
+                for (int i = 0; i < array.Count - 1; i++)
                 {
-                    if (collection[i].Height > collection[i + 1].Height)
+                    if (Compare(GetValue(i).Height, GetValue(i + 1).Height))
                     {
-                        collection[i].Fill = Brushes.Red;
-                        collection.Move(i, i+1);
-                        await Task.Delay(1);
+                        array[i].Fill = Brushes.Red;
+                        array.Move(i, i+1);
+                        await Task.Delay(delay);
                     }
-                    collection[i].Fill = Brushes.White;
+                    array[i].Fill = Brushes.White;
                 }
-                collection[k].Fill = Brushes.White;
+                array[k].Fill = Brushes.White;
             }
         }
 
-        private async Task ShakerSort(ObservableCollection<Rectangle> collection)
+        private async Task ShakerSort()
         {
             bool swap = true;
-            int index = collection.Count;
+            int index = array.Count;
             while (swap)
             {
                 swap = false;
-                for (int i = collection.Count - index; i < index - 1; i++)
+                for (int i = array.Count - index; i < index - 1; i++)
                 {
-                    collection[i].Fill = Brushes.Red;
-                    if (collection[i].Height > collection[i + 1].Height)
+                    array[i].Fill = Brushes.Red;
+                    if (Compare(GetValue(i).Height, GetValue(i + 1).Height))
                     {
-                        collection[i].Fill = Brushes.Red;
-                        collection.Move(i, i+1);
+                        array[i].Fill = Brushes.Red;
+                        array.Move(i, i+1);
+                        await Task.Delay(delay);
                         swap = true;
-                        await Task.Delay(1);
-                        collection[i + 1].Fill = Brushes.White;
+                        array[i + 1].Fill = Brushes.White;
                     }
-                    collection[i].Fill = Brushes.White;
+                    array[i].Fill = Brushes.White;
                 }
                 if (!swap) break;
                 index--;
                 swap = false;
-                for (int i = index - 1; i >= collection.Count - index; i--)
+
+                for (int i = index - 1; i >= array.Count - index; i--)
                 {
-                    collection[i].Fill = Brushes.Red;
-                    if (collection[i - 1].Height > collection[i].Height)
+                    array[i].Fill = Brushes.Red;
+                    if (Compare(GetValue(i - 1).Height, GetValue(i).Height))
                     {
-                        
-                        collection.Move(i-1, i);
+                        array.Move(i-1, i);
+                        await Task.Delay(delay);
                         swap = true;
-                        await Task.Delay(1);
-                        collection[i-1].Fill = Brushes.White;
+                        array[i-1].Fill = Brushes.White;
                     }
-                    collection[i].Fill = Brushes.White;
+                    array[i].Fill = Brushes.White;
                 }
             }
         }
 
-        private async Task ShellSort2(ObservableCollection<Rectangle> collection)
+        private async Task ShellSort()
         {
-            if (collection.Count == 0 || collection.Count == 1) return;
+            if (array.Count == 0 || array.Count == 1) return;
 
-            for (int s = collection.Count / 2; s > 0; s /= 2)
+            for (int s = array.Count / 2; s > 0; s /= 2)
             {
-                for (int i = s; i < collection.Count; ++i)
+                for (int i = s; i < array.Count; i += 1)
                 {
-                    for (int j = i - s; j >= 0; j -= s)
+                    var temp = GetValue(i);
+                    int j;
+                    for (j = i; j >= s && Compare(GetValue(j - s).Height, temp.Height); j -= s)
                     {
-                        
-                        if (collection[j].Height > collection[j + s].Height)
-                        {
-                            collection[j].Fill = Brushes.Red;
-                            collection.Move(j, j + s);
-                            await Task.Delay(1);
-                        }
-                        collection[j + s].Fill = Brushes.White;
+                        array[j - s].Fill = Brushes.Red;
+                        array.Move(j - s, j);
+                        await Task.Delay(delay);
+                        array[j].Fill = Brushes.White;
                     }
-
-                }
-            }
-
-        }
-
-        private async Task ShellSort(ObservableCollection<Rectangle> collection)
-        {
-            if (collection.Count == 0 || collection.Count == 1) return;
-
-            int[] l = [1750, 701, 301, 132, 57, 23, 10, 4, 1];
-
-            foreach (int k in l)
-            {
-                if (k >= collection.Count) continue;
-                if (k == 1)
-                {
-                    await ShellSort2(collection);
-                    return;
-                }
-
-                for (int i = 0; i < (collection.Count / k); i++)
-                {
-                    if (collection[i].Height < collection[i + k].Height)
-                    {
-                        collection[i].Fill = Brushes.Red;
-                        collection.Move(i, i + k);
-                        await Task.Delay(1);
-                    }
-                    collection[i + k].Fill = Brushes.White;
+                    array.Remove(temp);
+                    array.Insert(j, temp);
                 }
             }
         }
 
-        private async Task SelectionSort(ObservableCollection<Rectangle> collection)
+        private async Task SelectionSort()
         {
-            if (collection.Count == 0 || collection.Count == 1) return;
+            if (array.Count == 0 || array.Count == 1) return;
 
-            for (int i = 0; i < collection.Count - 1; i++)
+            for (int i = 0; i < array.Count - 1; ++i)
             {
                 int min = i;
-                for (int j = i + 1; j < collection.Count; j++)
+                for (int j = i + 1; j < array.Count; ++j)
                 {
-                    if (collection[j].Height > collection[min].Height)
+                    if (Compare(GetValue(min).Height, GetValue(j).Height))
                     {
                         min = j;
+                        await Task.Delay(delay);
                     }
                 }
-                collection[min].Fill = Brushes.Red;
-                collection.Move(i, min);
-                await Task.Delay(1);
-                collection[i].Fill = Brushes.White;
+                array[i].Fill = Brushes.Red;
+                if (i != min)
+                {
+                    array.Move(min, i);
+                    await Task.Delay(delay);
+                }
+                array[min].Fill = Brushes.White;
             }
         }
 
+        private async Task _quickSort(int low, int high)
+        {
+            var partition = async (int low, int high) =>
+            {
+                var pivot = GetValue(high);
+                var i = low - 1;
 
+                for (var j = low; j <= high - 1; j++)
+                {
+                    if (Compare(pivot.Height, GetValue(j).Height))
+                    {
+                        i++;
+                        array[i].Fill = Brushes.Red;
+                        var tmp1 = GetValue(i);
+                        var tmp2 = GetValue(j);
+                        array.Remove(tmp1);
+                        array.Insert(j, tmp1);
+                        array.Remove(tmp2);
+                        array.Insert(i, tmp2);
+
+                        await Task.Delay(delay);
+                        array[j].Fill = Brushes.White;
+                    }
+                }
+                array.Remove(pivot);
+                array.Insert(i + 1, pivot);
+                return i + 1;
+            };
+
+            if (low < high)
+            {
+                int pi = await partition(low, high);
+
+                await _quickSort(low, pi - 1);
+                await _quickSort(pi + 1, high);
+            }
+        }
+
+        private async Task QuickSort()
+        {
+            await _quickSort(0, array.Count - 1);
+        }
 
         private async void Shuffle_Click(object sender, RoutedEventArgs e)
         {
             await Shuffle(array);
         }
 
-        private async void Bubble_Click(object sender, RoutedEventArgs e)
+        private async void Sort_Click(object sender, RoutedEventArgs e)
         {
-            await BubbleSort(array);
-        }
-
-        private async void Shaker_Click(object sender, RoutedEventArgs e)
-        {
-            await ShakerSort(array);
-        }
-
-        private async void Shell2_Click(object sender, RoutedEventArgs e)
-        {
-            await ShellSort2(array);
-        }
-
-        private async void Selection_Click(object sender, RoutedEventArgs e)
-        {
-            await SelectionSort(array);
-        }
-
-        private async void Shell_Click(object sender, RoutedEventArgs e)
-        {
-            await ShellSort(array);
+            array.CollectionChanged += Array_CollectionChanged;
+            comparisions = 0;
+            arrayAcceses = 0;
+            delay = int.Parse(textBoxDelay.Text);
+            time.Restart();
+            await functionSortDict[(string)comboBoxAlgorithm.SelectedItem]();
+            time.Stop();
+            rtb.AppendText($"{comboBoxAlgorithm.SelectedItem} sort | Comparisions - {comparisions} | Array acceses - {arrayAcceses} | Time - {time.ElapsedMilliseconds} ms | Elements - {array.Count} | Dalay - {delay}\n");
+            array.CollectionChanged -= Array_CollectionChanged;
         }
 
         private void Generate_Click(object sender, RoutedEventArgs e)
         {
-            array = GenerateArray(200);
+            
+            GenerateArray(int.Parse(textBoxCount.Text));
             con.ItemsSource = array;
-            array.CollectionChanged += (sender, e) => { con.ItemsSource = array; };
+        }
 
+        private void comboBoxAlgorithm_Loaded(object sender, RoutedEventArgs e)
+        {
+            comboBoxAlgorithm.ItemsSource = functionSortDict.Keys;
+            comboBoxAlgorithm.SelectedIndex = 0;
+        }
+
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void rtb_Loaded(object sender, RoutedEventArgs e)
+        {
+            rtb.Document.PageWidth = 1000;
         }
     }
 }
