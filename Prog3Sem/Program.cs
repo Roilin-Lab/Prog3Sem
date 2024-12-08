@@ -238,7 +238,7 @@ namespace Prog3Sem
             }
         }
 
-        public void ShellSort2()
+        public void ShellSort2ForStr()
         {
             if (_store.Length == 0 || _store.Length == 1) return;
 
@@ -248,7 +248,7 @@ namespace Prog3Sem
                 {
                     for (int j = i - s; j >= 0; j -= s)
                     {
-                        if (_store[j].Capacity > _store[j + s].Capacity)
+                        if (string.Compare(_store[j].Manufacture, _store[j + s].Manufacture) == 1)
                         {
                             (_store[j], _store[j + s]) = (_store[j + s], _store[j]);
                         }
@@ -256,7 +256,6 @@ namespace Prog3Sem
                     
                 }
             }
-            
         }
 
         public Floppy[] Store { get => _store; }
@@ -396,39 +395,41 @@ namespace Prog3Sem
         static void lab_6()
         {
             Random r = new Random();
-            int sizeStore = 3000;
+            int sizeStore = 10;
             int cycle = 50;
 
             FloppyStore store = new FloppyStore(sizeStore);
             Console.WriteLine("Создаем Хранилище Дисков со случайными параметрами...");
             for (int i = 0; i < store.Lenght; i++)
             {
-                store[i] = new Floppy($"Floppy {i + 1}", (FormatInchEnum)r.Next(0, 3), (ushort)r.Next(0, 28800));
+                store[i] = new Floppy(GetRandomString(5), (FormatInchEnum)r.Next(0, 3), (ushort)r.Next(0, 28800));
                 
             }
             Console.WriteLine($"Размер хранилище: {sizeStore} объектов, {cycle} циклов сортировки.\n\r");
             store.Shuffle();
 
             //сортировка
-            Console.WriteLine("Сортируем массивы...\n\r");
-            Console.WriteLine("+---------------------+");
-            Console.WriteLine("| Алгоритм сортировки | Среднее время выполнения");
-            Console.WriteLine("+---------------------+");
-            Console.WriteLine($"| SelectionSort:      | {MeasureSort(store.SelectionSort, cycle)} сек."); store.Shuffle();
-            Console.WriteLine($"| InsertionSort:      | {MeasureSort(store.InsertionSort, cycle)} сек."); store.Shuffle();
-            Console.WriteLine($"| BubbleSort:         | {MeasureSort(store.BubbleSort, cycle)} сек."); store.Shuffle();
-            Console.WriteLine($"| ShakerSort:         | {MeasureSort(store.ShakerSort, cycle)} сек."); store.Shuffle();
-            Console.WriteLine($"| ShellSort:          | {MeasureSort(store.ShellSort, cycle)} сек."); store.Shuffle();
-            Console.WriteLine($"| ShellSort2:         | {MeasureSort(store.ShellSort2, cycle)} сек."); store.Shuffle();
-            Console.WriteLine("+---------------------+");
+            //Console.WriteLine("Сортируем массивы...\n\r");
+            //Console.WriteLine("+---------------------+");
+            //Console.WriteLine("| Алгоритм сортировки | Среднее время выполнения");
+            //Console.WriteLine("+---------------------+");
+            //Console.WriteLine($"| SelectionSort:      | {MeasureSort(store.SelectionSort, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine($"| InsertionSort:      | {MeasureSort(store.InsertionSort, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine($"| BubbleSort:         | {MeasureSort(store.BubbleSort, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine($"| ShakerSort:         | {MeasureSort(store.ShakerSort, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine($"| ShellSort:          | {MeasureSort(store.ShellSort, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine($"| ShellSort2:         | {MeasureSort(store.ShellSort2, cycle)} сек."); store.Shuffle();
+            //Console.WriteLine("+---------------------+");
 
-            //store.Shuffle();
-            //store.ShellSort();
-            //Console.WriteLine("Вывожу на экран все диски...");
-            //for (int i = 0; i < store.Lenght; i++)
-            //{
-            //    Console.WriteLine($"|Е: {store[i].Capacity}");
-            //}
+            store.Shuffle();
+            store.ShellSort2ForStr();
+            Console.WriteLine("Вывожу на экран все диски...");
+            for (int i = 0; i < store.Lenght; i++)
+            {
+                Console.WriteLine($"--------------------------");
+                Console.WriteLine($"    |M: {store[i].Manufacture}");
+                Console.WriteLine($"    |C: {store[i].Capacity}");
+            }
         }
 
         private static double MeasureSort(Action action, int iterations)
@@ -446,6 +447,18 @@ namespace Prog3Sem
             }
 
             return acc.Average() / 1000;
+        }
+
+        private static string GetRandomString(int length)
+        {
+            var r = new Random();
+            var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            char[] result = new char[length];
+            for (int i = 0; i <  length; i++)
+            { 
+                result[i] = alphabet[r.Next(0, alphabet.Length)];
+            }
+            return string.Join("", result);
         }
     }
 }

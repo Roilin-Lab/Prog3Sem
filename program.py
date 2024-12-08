@@ -1,11 +1,9 @@
-# Let's start by translating the C# code to Python step by step.
-# We'll first define the enums and the Floppy class, then proceed with the rest.
-
 from enum import Enum
 from time import sleep
+import json
+import time
 import random
 
-# Enums for format and side
 class FormatInchEnum(Enum):
     Eight = 0
     FiveAndQuater = 1
@@ -121,8 +119,21 @@ class FloppyStore:
                 self.floppies[j] = temp
             gap //= 2
 
-# MeasureSort equivalent function for timing the sorting algorithms
-import time
+    def shell_sort_for_str(self):
+        """Сортировка Шелла по строковому значению производителя дисков."""
+        n = len(self.floppies)
+        if n < 2:
+            return
+
+        gap = n // 2
+        while gap > 0:
+            for i in range(gap, n):
+                j = i
+                while j >= gap and self.floppies[j - gap].manufacture > self.floppies[j].manufacture:
+                    self.floppies[j], self.floppies[j - gap] = self.floppies[j - gap], self.floppies[j]
+                    j -= gap
+            gap //= 2
+
 
 def measure_sort(sorting_method, store, iterations):
     times = []
@@ -134,4 +145,124 @@ def measure_sort(sorting_method, store, iterations):
         store.shuffle()  # Shuffle after each iteration for randomization
     return sum(times) / iterations
 
-# The translation is now complete, and the sorting methods can be used and timed in Python.
+def lab_1():
+    print("Введите данные для гибкого диска:")
+    mnfc = input("Производитель: ")
+    format = FormatInchEnum(int(input("Формат (0: 8дюйм, 1: 5.25дюйм, 2: 3.5дюйм, 3: 3дюйм): ")))
+    capacity = int(input("Емкость в [КБ]: "))
+    print()
+
+    floppy = Floppy(mnfc, format, capacity)
+
+    print("Ваш диск: ")
+    print(floppy.manufacture)
+    print(floppy.format)
+    print(floppy.capacity)
+
+def lab_2():
+    floppy = Floppy()
+
+    print("Диск с конструктором по умолчанию: ")
+    print(floppy.manufacture)
+    print(floppy.format)
+    print(floppy.capacity)
+    print()
+
+    floppy1 = Floppy("IBM", FormatInchEnum.FiveAndQuater, 1440)
+
+    print("Диск с перегруженным конструктором: ")
+    print(floppy1.manufacture)
+    print(floppy1.format)
+    print(floppy1.capacity)
+    print()
+
+def lab_3():
+    floppy1 = Floppy("IBM", FormatInchEnum.FiveAndQuater, 1440)
+
+    print("Диск родитель: ")
+    print(floppy1.manufacture)
+    print(floppy1.format)
+    print(floppy1.capacity)
+    print()
+    floppy1.write_floppy()
+    print()
+
+    floppy2 = FloppyHD("Apple", FormatInchEnum.ThreeAndHalf, 720, SideEnum.Double)
+
+    print("Диск наследник: ")
+    print(floppy2.manufacture)
+    print(floppy2.format)
+    print(floppy2.capacity)
+    print(floppy2._side)
+    print()
+    floppy2.write_floppy()
+    print()
+    floppy2.read_floppy()
+
+def lab_4():
+    size = int(input("Введите желаемый размер хранилища в целых числах: "))
+    store = FloppyStore([Floppy(f"Floppy {i + 1}", FormatInchEnum(random.randint(0, 3)), random.randint(0, 2880)) for i in range(size)])
+    
+    print("Готово! Хранилище создано")
+    print("Вывожу на экран все диски...")
+    for floppy in store.floppies:
+        print(f"Диск:\n  |Название: {floppy.manufacture}\n  |Формат: {floppy.format}\n  |Емкость: {floppy.capacity}\n")
+
+def lab_5():
+    store = FloppyStore([Floppy(f"Floppy {i + 1}", FormatInchEnum(random.randint(0, 3)), random.randint(0, 2880)) for i in range(5)])
+
+    print("Создаем Хранилище Дисков со случайными параметрами и записываем данные в файл...")
+    with open("data.json", "w") as file:
+        json.dump([{"manufacture": floppy.manufacture, "format": floppy.format.name, "capacity": floppy.capacity} for floppy in store.floppies], file)
+    print("Файл записан!")
+
+    print("Читаем данные из файла...")
+    try:
+        with open("data.json", "r") as file:
+            store_data = json.load(file)
+            store1 = FloppyStore([Floppy(d["manufacture"], FormatInchEnum[d["format"]], d["capacity"]) for d in store_data])
+            print("Вывожу на экран все диски...")
+            for floppy in store1.floppies:
+                print(f"Диск:\n  |Название: {floppy.manufacture}\n  |Формат: {floppy.format}\n  |Емкость: {floppy.capacity}\n")
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("Не удалось считать/десериализовать файл.")
+
+import random
+import string
+
+def get_random_string(length):
+    """Возвращает случайную строку из букв заданной длины."""
+    letters = string.ascii_uppercase
+    return ''.join(random.choice(letters) for _ in range(length))
+
+def lab_6():
+    size_store = 10
+    cycle = 50
+
+    # Создаем хранилище с случайными параметрами
+    store = FloppyStore([Floppy(get_random_string(5), FormatInchEnum(random.randint(0, 3)), random.randint(0, 28800)) for _ in range(size_store)])
+    
+    print(f"Размер хранилища: {size_store} объектов, {cycle} циклов сортировки.\n")
+    store.shuffle()
+
+    # Сортировка и измерение времени для разных алгоритмов
+    print("+---------------------+")
+    print("| Алгоритм сортировки | Среднее время выполнения (сек)")
+    print("+---------------------+")
+    
+    for sort_method in ["selection_sort", "insertion_sort", "bubble_sort", "shaker_sort", "shell_sort"]:
+        store.shuffle()
+        avg_time = measure_sort(getattr(store, sort_method), store, cycle)
+        print(f"| {sort_method.capitalize():<20} | {avg_time:.4f} сек.")
+
+    store.shuffle()
+    store.shell_sort_for_str()  # Здесь предполагается, что ShellSort2 аналогичен shell_sort в Python
+
+    print("Вывожу на экран все диски...")
+    for floppy in store.floppies:
+        print("--------------------------")
+        print(f"    |M: {floppy.manufacture}")
+        print(f"    |C: {floppy.capacity}")
+
+
+lab_6()

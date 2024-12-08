@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -45,6 +46,12 @@ namespace SortAlgorithmsApp
             return obj1 > obj2;
         }
 
+        private bool Compare(string obj1, string obj2)
+        {
+            comparisions++;
+            return string.Compare(obj1, obj2) > 0 ? true : false;
+        }
+
         private Rectangle GetValue(int index)
         {
             arrayAcceses++;
@@ -56,8 +63,11 @@ namespace SortAlgorithmsApp
             array.Clear();
             var w = border.ActualWidth / count;
             var h = (border.ActualHeight - 3) / count;
+            var r = new Random();
             for (int i = 1; i <= count; i++)
             {
+                char[] name = ['a', 'b', 'c', 'd', 'f', 'g', 'h', 'l',];
+                r.Shuffle(name);
                 var rect = new Rectangle()
                 {
                     Width = w,
@@ -66,6 +76,7 @@ namespace SortAlgorithmsApp
                     SnapsToDevicePixels = true,
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
+                    Name = string.Join("", name),
                 };
                 array.Add(rect);
             }
@@ -177,7 +188,7 @@ namespace SortAlgorithmsApp
                 {
                     var temp = GetValue(i);
                     int j;
-                    for (j = i; j >= s && Compare(GetValue(j - s).Height, temp.Height); j -= s)
+                    for (j = i; j >= s && Compare(GetValue(j - s).Name, temp.Name); j -= s)
                     {
                         array[j - s].Fill = Brushes.Red;
                         array.Move(j - s, j);
@@ -188,6 +199,7 @@ namespace SortAlgorithmsApp
                     array.Insert(j, temp);
                 }
             }
+            
         }
 
         private async Task SelectionSort()
@@ -270,10 +282,18 @@ namespace SortAlgorithmsApp
             arrayAcceses = 0;
             delay = int.Parse(textBoxDelay.Text);
             time.Restart();
+
             await functionSortDict[(string)comboBoxAlgorithm.SelectedItem]();
+
             time.Stop();
+
             rtb.AppendText($"{comboBoxAlgorithm.SelectedItem} sort | Comparisions - {comparisions} | Array acceses - {arrayAcceses} | Time - {time.ElapsedMilliseconds} ms | Elements - {array.Count} | Dalay - {delay}\n");
             array.CollectionChanged -= Array_CollectionChanged;
+            
+            foreach (var item in array)
+            {
+                listBox.Items.Add(item.Name);
+            }
         }
 
         private void Generate_Click(object sender, RoutedEventArgs e)

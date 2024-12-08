@@ -55,6 +55,9 @@
             <Expander Header="History" Foreground="White">
                 <RichTextBox x:Name="rtb" HorizontalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Loaded="rtb_Loaded"/>
             </Expander>
+
+            <ListBox x:Name="listBox">
+            </ListBox>
         </StackPanel>
     </Grid>
 </Window>
